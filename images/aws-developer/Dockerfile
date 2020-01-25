@@ -33,29 +33,24 @@ RUN mkdir -p $HOME/.vim/bundle && \
     vim -c 'PluginInstall' -c 'qa!'
 
 # ZSH configuration
+ENV XTERM xterm-256color
 RUN sudo apt-get -y install \
     zsh zsh-syntax-highlighting
-ENV XTERM xterm-256color
-ENV ZSH_THEME awesomepanda
-# RUN wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -0- | zsh || true && \
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
-    echo "source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting/zsh" >> ~/.zshrc
 
-# Color scheme zsh
-# TODO: do I need this? better zsh config WIP
-# RUN git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k
-# RUN brew install zsh-syntax-highlighting
-# cd Downloads
-# curl -O https://raw.githubusercontent.com/MartinSeeler/iterm2-material-design/master/material-design-colors.itermcolors
-# # swap to material-design-colors.itermcolors in iterm
-# # add the following to zshrc
-# ZSH_THEME="powerlevel10k/powerlevel10k"
-# source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
+    sudo git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k && \
+    sudo git clone https://github.com/zsh-users/zsh-syntax-highlighting.git && \
+    echo "source ${PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${ZDOTDIR:-$HOME}/.zshrc && \
+    echo "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" >> ${ZDOTDIR:-$HOME}/.zshrc
+
+# swap to material-design-colors.itermcolors in iterm
+# TODO
+# RUN sudo curl -O https://raw.githubusercontent.com/MartinSeeler/iterm2-material-design/master/material-design-colors.itermcolors
 
 # Preferred alias shortcuts
 RUN echo "alias tree=\"tree -a -I 'node_modules|.git|__pycache__|.pytest_cache|jest_*|coverage'\"" >> ~/.zshrc
-RUN echo "alias pbcopy=\"xclip -selection clipboard\""
-RUN echo "alias pbpaste=\"xclip -selection clipboard -o\""
+RUN echo "alias pbcopy=\"xclip -selection clipboard\"" >> ~/.zshrc
+RUN echo "alias pbpaste=\"xclip -selection clipboard -o\"" >> ~/.zshrc
 
 WORKDIR $HOME/shared
 
