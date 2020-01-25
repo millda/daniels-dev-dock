@@ -30,6 +30,7 @@ jobs:
   release-aws-developer:
     executor: docker-executor
     steps:
+      - checkout
       - get-tag:
           directory: images/aws-developer
       - push:
@@ -55,6 +56,7 @@ jobs:
   release-base:
     executor: docker-executor
     steps:
+      - checkout
       - get-tag:
           directory: images/base
       - push:
