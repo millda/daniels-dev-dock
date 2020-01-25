@@ -1,4 +1,4 @@
-FROM :base
+FROM milldr/base:latest
 
 # Install apt packages
 RUN sudo apt-get update && \
