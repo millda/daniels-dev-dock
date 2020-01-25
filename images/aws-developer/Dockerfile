@@ -4,7 +4,7 @@ FROM milldr/base:latest
 RUN sudo apt-get update && \
     sudo apt-get install -y \
          ranger \
-         python-gitlab
+         python-gitlab \
          yamllint \
          npm
 
@@ -37,7 +37,8 @@ RUN sudo apt-get -y install \
     zsh zsh-syntax-highlighting
 ENV XTERM xterm-256color
 ENV ZSH_THEME awesomepanda
-RUN wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -0 - | zsh || true && \
+# RUN wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -0- | zsh || true && \
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
     echo "source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting/zsh" >> ~/.zshrc
 
 # Color scheme zsh
