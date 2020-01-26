@@ -5,6 +5,9 @@ ENV XTERM xterm-256color
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
+RUN git config --global user.email "miller0daniel@gmail.com" && \
+    git config --global user.name "milldr"
+
 # Install apt packages
 RUN sudo apt-get update && \
     sudo apt-get install -y \
