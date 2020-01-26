@@ -1,4 +1,4 @@
-if [ ! -d $HOME/developement_backup ]; then
+if [ ! -d $HOME/development_backup ]; then
   mkdir $HOME/development_backup
 fi
 docker build -t milldr/base:latest ./images/base  
