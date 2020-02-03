@@ -14,6 +14,17 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     apt-utils
 
+RUN apt-get clean && apt-get update && apt-get install -y \
+    locales \
+    language-pack-fi  \
+    language-pack-en && \
+    export LANGUAGE=en_US.UTF-8 && \
+    export LANG=en_US.UTF-8 && \
+    export LC_ALL=en_US.UTF-8 && \
+    locale-gen en_US.UTF-8 && \
+    dpkg-reconfigure locales
+
+
 # Set up Docker repository
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
   add-apt-repository \
@@ -27,6 +38,7 @@ RUN apt-get update \
        man \
        iputils-ping \
        software-properties-common \
+       file \
        build-essential \
        vim git nmap dtrx tree wget net-tools groff less jq xclip \
        docker-ce \
@@ -39,6 +51,8 @@ RUN useradd -m -d $HOME $USER && \
     mkdir -p /etc/sudoers.d && \
     echo "$USER ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USER
 RUN usermod -aG docker $USER
+
+RUN chown -R $USER:$USER $HOME
 
 USER $USER
 
