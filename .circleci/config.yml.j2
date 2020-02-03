@@ -28,6 +28,7 @@ jobs:
   release-{{ image }}:
     executor: docker-executor
     steps:
+      - checkout
       - get-tag:
           directory: images/{{ image }}
       - push:
