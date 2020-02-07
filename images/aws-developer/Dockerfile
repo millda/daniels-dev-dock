@@ -51,6 +51,11 @@ RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master
 # TODO swap to material-design-colors.itermcolors in iterm
 # RUN sudo curl -O https://raw.githubusercontent.com/MartinSeeler/iterm2-material-design/master/material-design-colors.itermcolors
 
+# Install Ansible
+RUN sudo apt-add-repository --yes --update ppa:ansible/ansible && \
+    sudo apt install -y ansible
+RUN pip3 install ansible lxml
+
 # Preferred alias shortcuts
 RUN echo "alias tree=\"tree -a -I 'node_modules|.git|__pycache__|.pytest_cache|jest_*|coverage'\"" >> ~/.zshrc
 RUN echo "alias pbcopy=\"xclip -selection clipboard\"" >> ~/.zshrc
