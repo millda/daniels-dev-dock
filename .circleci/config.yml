@@ -185,7 +185,7 @@ commands:
           command: docker load -i /tmp/workspace/<< parameters.image_name >>.tar
       - run:
           name: Login to DockerHub
-          command: echo "$DOCKER_PASS" | docker login --username $DOCKER_USERNAME --password-stdin
+          command: echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USERNAME --password-stdin
       - run:
           name: Push Docker image(s)
           command: |
