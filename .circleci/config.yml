@@ -34,6 +34,7 @@ jobs:
       - get-tag:
           directory: images/aws-developer
       - push:
+          image_name: aws-developer
           comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
 
   build-base:
@@ -60,6 +61,7 @@ jobs:
       - get-tag:
           directory: images/base
       - push:
+          image_name: base
           comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
 
 workflows:

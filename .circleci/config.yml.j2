@@ -32,6 +32,7 @@ jobs:
       - get-tag:
           directory: images/{{ image }}
       - push:
+          image_name: {{ image }}
           comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
 {% endfor %}
 workflows:
