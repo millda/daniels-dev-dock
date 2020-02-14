@@ -24,7 +24,6 @@ RUN apt-get clean && apt-get update && apt-get install -y \
     locale-gen en_US.UTF-8 && \
     dpkg-reconfigure locales
 
-
 # Set up Docker repository
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
   add-apt-repository \
@@ -39,7 +38,7 @@ RUN apt-get update \
        iputils-ping \
        software-properties-common \
        file \
-       build-essential \
+       build-essential checkinstall libssl-dev \
        vim git nmap dtrx tree wget net-tools groff less jq xclip \
        docker-ce \
        python3-pip && \
@@ -53,6 +52,8 @@ RUN useradd -m -d $HOME $USER && \
 RUN usermod -aG docker $USER
 
 RUN chown -R $USER:$USER $HOME
+RUN chown -R $USER:$USER $HOME/.*
+RUN chown -R $USER:$USER $HOME/.[^.]*
 
 USER $USER
 

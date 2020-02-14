@@ -16,15 +16,19 @@ RUN sudo apt-get update && \
          yamllint \
          npm
 
+# Ensure latest node
+RUN curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+RUN sudo apt-get install -y nodejs
+
 # Node Configuration and "hacks" for readying environment
 RUN sudo npm install -g \
     bundle yo
+RUN sudo chmod -R g+rwx $HOME $HOME/.config
 RUN yo; exit 0
-RUN sudo chmod g+rwx /$HOME /$HOME/.config /$HOME/.config/insight-nodejs
 
 # Python and Pip Configuration
-RUN sudo pip3 install --upgrade pip && \
-    sudo pip3 install pipenv \
+RUN sudo -H pip3 install --upgrade pip && \
+    sudo -H pip3 install pipenv \
          awscli boto boto3 \
          pylint black yapf \
          cookiecutter \
@@ -35,7 +39,9 @@ RUN sudo pip3 install --upgrade pip && \
 
 # VIM configuration
 COPY vimrc $HOME/.vimrc
+RUN sudo chmod -R g+rwx $HOME/.vimrc
 RUN mkdir -p $HOME/.vim/bundle && \
+    sudo chmod -R g+rwx $HOME/.vim && \
     git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim && \
     vim -c 'PluginInstall' -c 'qa!'
 
