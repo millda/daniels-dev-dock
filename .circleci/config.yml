@@ -37,6 +37,33 @@ jobs:
           image_name: aws-developer
           comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
 
+  build-go-developer:
+    executor: docker-executor
+    steps:
+      - docker-build:
+          image_name: go-developer
+          path: images/go-developer
+  publish-latest-go-developer:
+    executor: docker-executor
+    steps:
+      - push:
+          image_name: go-developer
+          comma_separated_tags: "latest"
+  scan-go-developer:
+    executor: clair-scanner/default
+    steps:
+      - clair-scan:
+          image_name: go-developer
+  release-go-developer:
+    executor: docker-executor
+    steps:
+      - checkout
+      - get-tag:
+          directory: images/go-developer
+      - push:
+          image_name: go-developer
+          comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
+
   build-base:
     executor: docker-executor
     steps:
@@ -74,6 +101,10 @@ workflows:
           requires:
             - publish-latest-base
 
+      - build-go-developer:
+          requires:
+            - publish-latest-base
+
 
       - scan-aws-developer:
           requires:
@@ -94,6 +125,29 @@ workflows:
       - release-aws-developer:
           requires:
             - approve-release-aws-developer
+          filters:
+            branches:
+              only: master
+
+      - scan-go-developer:
+          requires:
+            - build-go-developer
+      - publish-latest-go-developer:
+          requires:
+            - scan-go-developer
+          filters:
+            branches:
+              only: master
+      - approve-release-go-developer:
+          type: approval
+          requires:
+            - scan-go-developer
+          filters:
+            branches:
+              only: master
+      - release-go-developer:
+          requires:
+            - approve-release-go-developer
           filters:
             branches:
               only: master
