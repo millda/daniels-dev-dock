@@ -55,16 +55,9 @@ workflows:
           filters:
             branches:
               only: master
-      - approve-release-{{ image }}:
-          type: approval
-          requires:
-            - scan-{{ image }}
-          filters:
-            branches:
-              only: master
       - release-{{ image }}:
           requires:
-            - approve-release-{{ image }}
+            - scan-{{ image }}
           filters:
             branches:
               only: master
