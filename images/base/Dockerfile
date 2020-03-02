@@ -35,6 +35,7 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
 # Update since we just installed repos
 # Install apt-utils + build tools
 # Suppress package configuration warning
+RUN add-apt-repository ppa:jonathonf/vim
 RUN apt-get update \
 		&& apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
 		&& apt-get install -y \
@@ -107,7 +108,9 @@ RUN sudo apt-get update
 
 # Vim config
 RUN sudo git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim && \
-    vim -c 'PluginInstall' -c 'qa!'
+    sudo mkdir -p $HOME/.vim/pack/default/start && \
+    sudo git clone https://github.com/sheerun/vim-polyglot $HOME/.vim/pack/default/start/vim-polyglot && \
+    sudo vim -c 'PluginInstall' -c 'qa!'
 
 # ZSH configuration
 RUN sudo apt-get -y install \
