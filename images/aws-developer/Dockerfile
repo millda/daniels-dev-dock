@@ -60,6 +60,7 @@ RUN pip3 install ansible lxml
 RUN echo "alias tree=\"tree -a -I 'node_modules|.git|__pycache__|.pytest_cache|jest_*|coverage'\"" >> ~/.zshrc
 RUN echo "alias pbcopy=\"xclip -selection clipboard\"" >> ~/.zshrc
 RUN echo "alias pbpaste=\"xclip -selection clipboard -o\"" >> ~/.zshrc
+RUN echo "alias python=\"python3\"" >> ~/.zshrc
 
 WORKDIR $HOME/shared
 
