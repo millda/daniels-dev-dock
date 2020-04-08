@@ -32,3 +32,11 @@ RUN sudo -H pip3 install --upgrade pip && \
 RUN sudo apt-add-repository --yes --update ppa:ansible/ansible && \
     sudo apt install -y ansible
 RUN pip3 install ansible lxml
+
+# Install homebrew
+RUN sudo chown -R $USER:$USER /home/developer/.config
+RUN git clone https://github.com/Homebrew/brew ~/.linuxbrew/Homebrew && \
+    mkdir ~/.linuxbrew/bin && \
+    ln -s ~/.linuxbrew/Homebrew/bin/brew ~/.linuxbrew/bin
+RUN eval $(~/.linuxbrew/bin/brew shellenv) && \
+    brew install hugo
