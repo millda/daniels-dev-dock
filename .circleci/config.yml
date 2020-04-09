@@ -37,6 +37,60 @@ jobs:
           image_name: aws-developer
           comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
 
+  build-complete-devops-toolset:
+    executor: docker-executor
+    steps:
+      - docker-build:
+          image_name: complete-devops-toolset
+          path: images/complete-devops-toolset
+  publish-latest-complete-devops-toolset:
+    executor: docker-executor
+    steps:
+      - push:
+          image_name: complete-devops-toolset
+          comma_separated_tags: "latest"
+  scan-complete-devops-toolset:
+    executor: clair-scanner/default
+    steps:
+      - clair-scan:
+          image_name: complete-devops-toolset
+  release-complete-devops-toolset:
+    executor: docker-executor
+    steps:
+      - checkout
+      - get-tag:
+          directory: images/complete-devops-toolset
+      - push:
+          image_name: complete-devops-toolset
+          comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
+
+  build-gcp-developer:
+    executor: docker-executor
+    steps:
+      - docker-build:
+          image_name: gcp-developer
+          path: images/gcp-developer
+  publish-latest-gcp-developer:
+    executor: docker-executor
+    steps:
+      - push:
+          image_name: gcp-developer
+          comma_separated_tags: "latest"
+  scan-gcp-developer:
+    executor: clair-scanner/default
+    steps:
+      - clair-scan:
+          image_name: gcp-developer
+  release-gcp-developer:
+    executor: docker-executor
+    steps:
+      - checkout
+      - get-tag:
+          directory: images/gcp-developer
+      - push:
+          image_name: gcp-developer
+          comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
+
   build-go-developer:
     executor: docker-executor
     steps:
@@ -91,33 +145,6 @@ jobs:
           image_name: web-developer
           comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
 
-  build-gcp-developer:
-    executor: docker-executor
-    steps:
-      - docker-build:
-          image_name: gcp-developer
-          path: images/gcp-developer
-  publish-latest-gcp-developer:
-    executor: docker-executor
-    steps:
-      - push:
-          image_name: gcp-developer
-          comma_separated_tags: "latest"
-  scan-gcp-developer:
-    executor: clair-scanner/default
-    steps:
-      - clair-scan:
-          image_name: gcp-developer
-  release-gcp-developer:
-    executor: docker-executor
-    steps:
-      - checkout
-      - get-tag:
-          directory: images/gcp-developer
-      - push:
-          image_name: gcp-developer
-          comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
-
   build-base:
     executor: docker-executor
     steps:
@@ -155,15 +182,19 @@ workflows:
           requires:
             - publish-latest-base
 
+      - build-complete-devops-toolset:
+          requires:
+            - publish-latest-base
+
+      - build-gcp-developer:
+          requires:
+            - publish-latest-base
+
       - build-go-developer:
           requires:
             - publish-latest-base
 
       - build-web-developer:
-          requires:
-            - publish-latest-base
-
-      - build-gcp-developer:
           requires:
             - publish-latest-base
 
@@ -180,6 +211,38 @@ workflows:
       - release-aws-developer:
           requires:
             - scan-aws-developer
+          filters:
+            branches:
+              only: master
+
+      - scan-complete-devops-toolset:
+          requires:
+            - build-complete-devops-toolset
+      - publish-latest-complete-devops-toolset:
+          requires:
+            - scan-complete-devops-toolset
+          filters:
+            branches:
+              only: master
+      - release-complete-devops-toolset:
+          requires:
+            - scan-complete-devops-toolset
+          filters:
+            branches:
+              only: master
+
+      - scan-gcp-developer:
+          requires:
+            - build-gcp-developer
+      - publish-latest-gcp-developer:
+          requires:
+            - scan-gcp-developer
+          filters:
+            branches:
+              only: master
+      - release-gcp-developer:
+          requires:
+            - scan-gcp-developer
           filters:
             branches:
               only: master
@@ -212,22 +275,6 @@ workflows:
       - release-web-developer:
           requires:
             - scan-web-developer
-          filters:
-            branches:
-              only: master
-
-      - scan-gcp-developer:
-          requires:
-            - build-gcp-developer
-      - publish-latest-gcp-developer:
-          requires:
-            - scan-gcp-developer
-          filters:
-            branches:
-              only: master
-      - release-gcp-developer:
-          requires:
-            - scan-gcp-developer
           filters:
             branches:
               only: master
