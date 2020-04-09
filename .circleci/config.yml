@@ -64,6 +64,60 @@ jobs:
           image_name: go-developer
           comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
 
+  build-web-developer:
+    executor: docker-executor
+    steps:
+      - docker-build:
+          image_name: web-developer
+          path: images/web-developer
+  publish-latest-web-developer:
+    executor: docker-executor
+    steps:
+      - push:
+          image_name: web-developer
+          comma_separated_tags: "latest"
+  scan-web-developer:
+    executor: clair-scanner/default
+    steps:
+      - clair-scan:
+          image_name: web-developer
+  release-web-developer:
+    executor: docker-executor
+    steps:
+      - checkout
+      - get-tag:
+          directory: images/web-developer
+      - push:
+          image_name: web-developer
+          comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
+
+  build-gcp-developer:
+    executor: docker-executor
+    steps:
+      - docker-build:
+          image_name: gcp-developer
+          path: images/gcp-developer
+  publish-latest-gcp-developer:
+    executor: docker-executor
+    steps:
+      - push:
+          image_name: gcp-developer
+          comma_separated_tags: "latest"
+  scan-gcp-developer:
+    executor: clair-scanner/default
+    steps:
+      - clair-scan:
+          image_name: gcp-developer
+  release-gcp-developer:
+    executor: docker-executor
+    steps:
+      - checkout
+      - get-tag:
+          directory: images/gcp-developer
+      - push:
+          image_name: gcp-developer
+          comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
+
   build-base:
     executor: docker-executor
     steps:
@@ -105,6 +159,14 @@ workflows:
           requires:
             - publish-latest-base
 
+      - build-web-developer:
+          requires:
+            - publish-latest-base
+
+      - build-gcp-developer:
+          requires:
+            - publish-latest-base
+
 
       - scan-aws-developer:
           requires:
@@ -134,6 +196,38 @@ workflows:
       - release-go-developer:
           requires:
             - scan-go-developer
+          filters:
+            branches:
+              only: master
+
+      - scan-web-developer:
+          requires:
+            - build-web-developer
+      - publish-latest-web-developer:
+          requires:
+            - scan-web-developer
+          filters:
+            branches:
+              only: master
+      - release-web-developer:
+          requires:
+            - scan-web-developer
+          filters:
+            branches:
+              only: master
+
+      - scan-gcp-developer:
+          requires:
+            - build-gcp-developer
+      - publish-latest-gcp-developer:
+          requires:
+            - scan-gcp-developer
+          filters:
+            branches:
+              only: master
+      - release-gcp-developer:
+          requires:
+            - scan-gcp-developer
           filters:
             branches:
               only: master
