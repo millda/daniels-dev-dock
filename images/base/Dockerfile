@@ -73,24 +73,17 @@ RUN apt-get update \
     && pip3 install --upgrade pip setuptools virtualenv \
 		&& rm -rf /var/lib/apt/lists/*
 
+# Create and set up Developer USER
 ENV USER=developer
-
 ENV HOME=/home/$USER
-RUN useradd -m -d $HOME $USER && \
-    mkdir -p /etc/sudoers.d && \
+ENV GROUP=$USER
+RUN groupadd $GROUP
+RUN useradd -m -g $GROUP $USER
+RUN chown -R $USER:$GROUP $HOME
+
+# Add user as a sudoer
+RUN mkdir -p /etc/sudoers.d && \
     echo "$USER ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USER
-RUN usermod -aG docker $USER
-
-# Give User access to everything.
-# TODO: There has to be a better way to do this
-RUN chown -R $USER:$USER $HOME
-RUN chown -R $USER:$USER $HOME/.*
-RUN chown -R $USER:$USER $HOME/.[^.]*
-
-# VIM configuration
-COPY vimrc $HOME/.vimrc
-RUN mkdir -p $HOME/.vim/bundle && \
-    chmod -R g+rwx $HOME/.vim $HOME/.vimrc
 
 USER $USER
 
@@ -100,32 +93,29 @@ ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN git config --global user.email "miller0daniel@gmail.com" && \
-    git config --global user.name "milldr"
+# Copy configuration files 
+COPY --chown=$USER:$GROUP gitconfig $HOME/.gitconfig
+COPY --chown=$USER:$GROUP vimrc $HOME/.vimrc
+COPY --chown=$USER:$GROUP zshrc $HOME/.zshrc
 
 # Ensure packages up-to-date
 RUN sudo apt-get update
 
 # Vim config
-RUN sudo git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim && \
-    sudo mkdir -p $HOME/.vim/pack/default/start && \
-    sudo git clone https://github.com/sheerun/vim-polyglot $HOME/.vim/pack/default/start/vim-polyglot && \
-    sudo vim -c 'PluginInstall' -c 'qa!'
+RUN git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim && \
+    mkdir -p $HOME/.vim/pack/default/start && \
+    git clone https://github.com/sheerun/vim-polyglot $HOME/.vim/pack/default/start/vim-polyglot && \
+    vim -c 'PluginInstall' -c 'qa!'
 
 # ZSH configuration
 RUN sudo apt-get -y install \
     zsh zsh-syntax-highlighting
-COPY zshrc $HOME/.zshrc
 
 # Install ZSH theme
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
-    sudo git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k && \
-    sudo git clone https://github.com/zsh-users/zsh-syntax-highlighting.git && \
+    git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k && \
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git && \
     echo "source ${PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${ZDOTDIR:-$HOME}/.zshrc && \
     echo "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" >> ${ZDOTDIR:-$HOME}/.zshrc
-
-# TODO swap to material-design-colors.itermcolors in iterm
-# RUN sudo curl -O https://raw.githubusercontent.com/MartinSeeler/iterm2-material-design/master/material-design-colors.itermcolors
-
 
 WORKDIR $HOME/shared
