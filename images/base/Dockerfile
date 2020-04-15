@@ -73,42 +73,39 @@ RUN apt-get update \
     && pip3 install --upgrade pip setuptools virtualenv \
 		&& rm -rf /var/lib/apt/lists/*
 
-# Create and set up Developer USER
+# Create and set up developer USER
 ENV USER=developer
 ENV HOME=/home/$USER
 ENV GROUP=$USER
 RUN groupadd $GROUP
 RUN useradd -m -g $GROUP $USER
+
+VOLUME $HOME
 RUN chown -R $USER:$GROUP $HOME
 
 # Add user as a sudoer
 RUN mkdir -p /etc/sudoers.d && \
     echo "$USER ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USER
 
-USER $USER
-
-# User env config
-ENV XTERM xterm-256color
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
-ENV DEBIAN_FRONTEND=noninteractive
-
 # Copy configuration files 
 COPY --chown=$USER:$GROUP gitconfig $HOME/.gitconfig
 COPY --chown=$USER:$GROUP vimrc $HOME/.vimrc
 COPY --chown=$USER:$GROUP zshrc $HOME/.zshrc
 
-# Ensure packages up-to-date
-RUN sudo apt-get update
+# If any of these files already exist, chown doesnt work correctly. Run it again
+RUN sudo chown -R $USER:$GROUP $HOME/.gitconfig
+RUN sudo chown -R $USER:$GROUP $HOME/.vimrc
+RUN sudo chown -R $USER:$GROUP $HOME/.zshrc
 
 # Vim config
 RUN git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim && \
     mkdir -p $HOME/.vim/pack/default/start && \
     git clone https://github.com/sheerun/vim-polyglot $HOME/.vim/pack/default/start/vim-polyglot && \
-    vim -c 'PluginInstall' -c 'qa!'
+    vim -c 'PluginInstall' -c 'qa!'  &>/dev/null
 
 # ZSH configuration
-RUN sudo apt-get -y install \
+RUN apt-get -y update && \
+    apt-get -y install \
     zsh zsh-syntax-highlighting
 
 # Install ZSH theme
@@ -117,5 +114,13 @@ RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git && \
     echo "source ${PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${ZDOTDIR:-$HOME}/.zshrc && \
     echo "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" >> ${ZDOTDIR:-$HOME}/.zshrc
+
+USER $USER
+
+# User env config
+ENV XTERM xterm-256color
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR $HOME/shared
