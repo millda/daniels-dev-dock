@@ -88,9 +88,9 @@ RUN mkdir -p /etc/sudoers.d && \
     echo "$USER ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USER
 
 # Copy configuration files 
-COPY --chown=$USER:$GROUP gitconfig $HOME/.gitconfig
-COPY --chown=$USER:$GROUP vimrc $HOME/.vimrc
-COPY --chown=$USER:$GROUP zshrc $HOME/.zshrc
+COPY gitconfig $HOME/.gitconfig
+COPY vimrc $HOME/.vimrc
+COPY zshrc $HOME/.zshrc
 
 # If any of these files already exist, chown doesnt work correctly. Run it again
 RUN sudo chown -R $USER:$GROUP $HOME/.gitconfig
