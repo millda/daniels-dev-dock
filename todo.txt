@@ -1,5 +1,0 @@
-- clean up ps scripts
-- add generator for complete toolset. you can merge images, so create a script
-  on push to copy the contents of each image, and merge them together
-- ^ add new image in ci build for this
-

@@ -31,5 +31,3 @@ RUN \
 
 # Verify
 RUN terraform version
-
-# TODO, clone config-lint and make 
