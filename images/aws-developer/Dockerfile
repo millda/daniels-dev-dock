@@ -14,7 +14,6 @@ RUN sudo apt-get install -y nodejs
 # Node Configuration and "hacks" for readying environment
 RUN sudo npm install -g \
     bundle yo
-RUN sudo chmod -R g+rwx $HOME $HOME/.config
 RUN yo; exit 0
 
 # Python and Pip Configuration
@@ -34,9 +33,8 @@ RUN sudo apt-add-repository --yes --update ppa:ansible/ansible && \
 RUN pip3 install ansible lxml
 
 # Install homebrew
-RUN sudo chown -R $USER:$USER /home/developer/.config
 RUN git clone https://github.com/Homebrew/brew ~/.linuxbrew/Homebrew && \
     mkdir ~/.linuxbrew/bin && \
-    ln -s ~/.linuxbrew/Homebrew/bin/brew ~/.linuxbrew/bin
-RUN eval $(~/.linuxbrew/bin/brew shellenv) && \
+    ln -s ~/.linuxbrew/Homebrew/bin/brew ~/.linuxbrew/bin && \
+    eval $(~/.linuxbrew/bin/brew shellenv) && \
     brew install hugo

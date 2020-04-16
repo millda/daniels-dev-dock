@@ -88,19 +88,21 @@ RUN mkdir -p /etc/sudoers.d && \
     echo "$USER ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USER
 
 # Copy configuration files 
-COPY gitconfig $HOME/.gitconfig
-COPY vimrc $HOME/.vimrc
-COPY zshrc $HOME/.zshrc
+COPY --chown=$USER:$USER gitconfig $HOME/.gitconfig
+COPY --chown=$USER:$USER vimrc $HOME/.vimrc
+COPY --chown=$USER:$USER zshrc $HOME/.zshrc
 
 # If any of these files already exist, chown doesnt work correctly. Run it again
-RUN sudo chown -R $USER:$GROUP $HOME/.gitconfig
-RUN sudo chown -R $USER:$GROUP $HOME/.vimrc
-RUN sudo chown -R $USER:$GROUP $HOME/.zshrc
+RUN chown -R $USER:$GROUP $HOME/.gitconfig
+RUN chown -R $USER:$GROUP $HOME/.vimrc
+RUN chown -R $USER:$GROUP $HOME/.zshrc
+
+## Note: We just ran chown twice. Docker behaves strangly so w/e just do it twice it doesnt matter
 
 # Vim config
-RUN git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim && \
-    mkdir -p $HOME/.vim/pack/default/start && \
-    git clone https://github.com/sheerun/vim-polyglot $HOME/.vim/pack/default/start/vim-polyglot && \
+RUN git clone https://github.com/Vundle=im/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim && \
+    mkdir -p $HOME/.vim/pack/default/st=rt && \
+    git clone https://github.com/sheeru=/vim-polyglot $HOME/.vim/pack/default/start/vim-polyglot && \
     vim -c 'PluginInstall' -c 'qa!'  &>/dev/null
 
 # ZSH configuration
@@ -108,14 +110,16 @@ RUN apt-get -y update && \
     apt-get -y install \
     zsh zsh-syntax-highlighting
 
-# Install ZSH theme
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
-    git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k && \
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git && \
-    echo "source ${PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${ZDOTDIR:-$HOME}/.zshrc && \
-    echo "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" >> ${ZDOTDIR:-$HOME}/.zshrc
-
 USER $USER
+
+# Install ZSH theme
+# This has to be run in a single intermediate container, but git needs root. So sudo it
+ENV ZSH_CUSTOM=$HOME/zsh-custom
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
+    sudo git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k && \
+    sudo git clone https://github.com/zsh-users/zsh-syntax-highlighting.git && \
+    echo "source ${PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> $HOME/.zshrc && \
+    echo "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" >> $HOME/.zshrc
 
 # User env config
 ENV XTERM xterm-256color
