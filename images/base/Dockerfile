@@ -35,19 +35,19 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
 # Update since we just installed repos
 # Install apt-utils + build tools
 # Suppress package configuration warning
-RUN add-apt-repository ppa:jonathonf/vim
+RUN add-apt-repository ppa:jonathonf/vim 
 RUN apt-get update \
-		&& apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
-		&& apt-get install -y \
-		  bc \
-		  unzip \
-		  wget \
-		  g++ \
-		  gcc \
-		  libc6-dev \
-		  make \
-		  pkg-config \
-		  gnupg-agent \
+    && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
+    && apt-get install -y \
+      bc \
+      unzip \
+      wget \
+      g++ \
+      gcc \
+      libc6-dev \
+      make \
+      pkg-config \
+      gnupg-agent \
       sudo \
       man \
       iputils-ping \
@@ -70,8 +70,9 @@ RUN apt-get update \
       docker-ce \
       python3-pip \
       ranger \
+      zsh zsh-syntax-highlighting \
     && pip3 install --upgrade pip setuptools virtualenv \
-		&& rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 # Create and set up developer USER
 ENV USER=developer
@@ -87,17 +88,19 @@ RUN chown -R $USER:$GROUP $HOME
 RUN mkdir -p /etc/sudoers.d && \
     echo "$USER ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USER
 
+USER $USER
+
+# User env config
+ENV XTERM xterm-256color
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Copy configuration files 
-COPY --chown=$USER:$USER gitconfig $HOME/.gitconfig
-COPY --chown=$USER:$USER vimrc $HOME/.vimrc
-COPY --chown=$USER:$USER zshrc $HOME/.zshrc
-
-# If any of these files already exist, chown doesnt work correctly. Run it again
-RUN chown -R $USER:$GROUP $HOME/.gitconfig
-RUN chown -R $USER:$GROUP $HOME/.vimrc
-RUN chown -R $USER:$GROUP $HOME/.zshrc
-
-## Note: We just ran chown twice. Docker behaves strangly so w/e just do it twice it doesnt matter
+# copy with chown for a given user must be run after USER {{given user}}
+COPY --chown=$USER:$GROUP gitconfig $HOME/.gitconfig
+COPY --chown=$USER:$GROUP vimrc $HOME/.vimrc
+COPY --chown=$USER:$GROUP zshrc $HOME/.zshrc
 
 # Vim config
 RUN git clone https://github.com/Vundle=im/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim && \
@@ -105,26 +108,13 @@ RUN git clone https://github.com/Vundle=im/Vundle.vim.git $HOME/.vim/bundle/Vund
     git clone https://github.com/sheeru=/vim-polyglot $HOME/.vim/pack/default/start/vim-polyglot && \
     vim -c 'PluginInstall' -c 'qa!'  &>/dev/null
 
-# ZSH configuration
-RUN apt-get -y update && \
-    apt-get -y install \
-    zsh zsh-syntax-highlighting
-
-USER $USER
-
 # Install ZSH theme
 # This has to be run in a single intermediate container, but git needs root. So sudo it
 ENV ZSH_CUSTOM=$HOME/zsh-custom
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
+RUN sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
     sudo git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k && \
     sudo git clone https://github.com/zsh-users/zsh-syntax-highlighting.git && \
     echo "source ${PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> $HOME/.zshrc && \
     echo "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" >> $HOME/.zshrc
-
-# User env config
-ENV XTERM xterm-256color
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
-ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR $HOME/shared
