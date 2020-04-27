@@ -1,7 +1,8 @@
 FROM ubuntu:latest
+MAINTAINER milldr
 
 # Avoid warnings by switching to noninteractive
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND noninteractive
 
 # Do not exclude man pages & other documentation
 # Reinstall all currently installed packages in order to get the man pages back
@@ -80,7 +81,7 @@ ENV GROUP=$USER
 RUN groupadd $GROUP
 RUN useradd -m -g $GROUP $USER
 
-VOLUME $HOME
+# VOLUME $HOME
 RUN chown -R $USER:$GROUP $HOME
 
 # Add user as a sudoer
@@ -92,39 +93,29 @@ COPY --chown=$USER:$USER gitconfig $HOME/.gitconfig
 COPY --chown=$USER:$USER vimrc $HOME/.vimrc
 COPY --chown=$USER:$USER zshrc $HOME/.zshrc
 
-# If any of these files already exist, chown doesnt work correctly. Run it again
-RUN chown -R $USER:$GROUP $HOME/.gitconfig
-RUN chown -R $USER:$GROUP $HOME/.vimrc
-RUN chown -R $USER:$GROUP $HOME/.zshrc
-
-## Note: We just ran chown twice. Docker behaves strangly so w/e just do it twice it doesnt matter
-
-# Vim config
-RUN git clone https://github.com/Vundle=im/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim && \
-    mkdir -p $HOME/.vim/pack/default/st=rt && \
-    git clone https://github.com/sheeru=/vim-polyglot $HOME/.vim/pack/default/start/vim-polyglot && \
-    vim -c 'PluginInstall' -c 'qa!'  &>/dev/null
-
-# ZSH configuration
-RUN apt-get -y update && \
-    apt-get -y install \
+RUN sudo apt-get -y update && \
+    sudo apt -y install \
     zsh zsh-syntax-highlighting
 
 USER $USER
-
-# Install ZSH theme
-# This has to be run in a single intermediate container, but git needs root. So sudo it
-ENV ZSH_CUSTOM=$HOME/zsh-custom
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
-    sudo git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k && \
-    sudo git clone https://github.com/zsh-users/zsh-syntax-highlighting.git && \
-    echo "source ${PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> $HOME/.zshrc && \
-    echo "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" >> $HOME/.zshrc
 
 # User env config
 ENV XTERM xterm-256color
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND noninteractive
 
 WORKDIR $HOME/shared
+
+# RUN chown -R $USER:$GROUP $HOME/.vimrc
+RUN git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim && \
+    mkdir -p $HOME/.vim/pack/default/start && \
+    vim +PluginInstall +qall
+
+# ZSH configuration
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
+    git clone https://github.com/romkatv/powerlevel10k.git $HOME/zsh/themes/powerlevel10k && \
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/zsh/zsh-syntax-highlighting && \
+    echo "source ${HOME}/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> $HOME/.zshrc && \
+    echo "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" >> $HOME/.zshrc
+
