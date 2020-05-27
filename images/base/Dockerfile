@@ -1,7 +1,8 @@
 FROM ubuntu:latest
+MAINTAINER milldr
 
 # Avoid warnings by switching to noninteractive
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND noninteractive
 
 # Do not exclude man pages & other documentation
 # Reinstall all currently installed packages in order to get the man pages back
