@@ -15,11 +15,15 @@ ENV GOROOT $HOME/go
 ENV GOPATH $HOME/go-workspace
 ENV PATH $PATH:/usr/local/go/bin:$GOROOT/bin:$GOPATH/bin
 
+RUN echo $GOROOT && \
+    echo $GOPATH && \
+    echo $PATH
+
 # Verify
-RUN go version
+# RUN go version
 
 # Give local user Go permission
-RUN sudo chown -R $USER $GOROOT
+# RUN sudo chown -R $USER $GOROOT
 
 # Install Terraform
 ARG TERRAFORM_VERSION=0.12.20

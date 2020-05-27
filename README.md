@@ -9,7 +9,7 @@ A consistent developer environment with all my preferred tools and configuration
 2. Run whatever shell script in `./bin/`
 3. Code away :nerd_face:
 
-The start script will create a shared directory under `~/development_backup` and save all work there (unix). For windows I'm saving to my F drive because my home directory is full. Change it to whatever you want in script
+The start script will create a shared directory under `~/development_backup` and save all work there (unix). For windows I'm saving to my F drive because my home directory is full, which is set by an env var $DEV. Change it to whatever you want in script
 
 ## Windows Note
 

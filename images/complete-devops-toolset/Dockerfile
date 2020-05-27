@@ -17,7 +17,6 @@ RUN sudo apt-get install -y nodejs
 # Node Configuration and "hacks" for readying environment
 RUN sudo npm install -g \
     bundle yo
-RUN sudo chmod -R g+rwx $HOME $HOME/.config
 RUN yo; exit 0
 
 # Python and Pip Configuration
@@ -37,11 +36,10 @@ RUN sudo apt-add-repository --yes --update ppa:ansible/ansible && \
 RUN pip3 install ansible lxml
 
 # Install homebrew
-RUN sudo chown -R $USER:$USER /home/developer/.config
 RUN git clone https://github.com/Homebrew/brew ~/.linuxbrew/Homebrew && \
     mkdir ~/.linuxbrew/bin && \
-    ln -s ~/.linuxbrew/Homebrew/bin/brew ~/.linuxbrew/bin
-RUN eval $(~/.linuxbrew/bin/brew shellenv) && \
+    ln -s ~/.linuxbrew/Homebrew/bin/brew ~/.linuxbrew/bin && \
+    eval $(~/.linuxbrew/bin/brew shellenv) && \
     brew install hugo
 
 # Install GCP CloudSDK
@@ -65,11 +63,15 @@ ENV GOROOT $HOME/go
 ENV GOPATH $HOME/go-workspace
 ENV PATH $PATH:/usr/local/go/bin:$GOROOT/bin:$GOPATH/bin
 
+RUN echo $GOROOT && \
+    echo $GOPATH && \
+    echo $PATH
+
 # Verify
-RUN go version
+# RUN go version
 
 # Give local user Go permission
-RUN sudo chown -R $USER $GOROOT
+# RUN sudo chown -R $USER $GOROOT
 
 # Install Terraform
 ARG TERRAFORM_VERSION=0.12.20

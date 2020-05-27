@@ -1,4 +1,4 @@
-FROM milldr/complete-devops-toolset:latest
+FROM milldr/aws-developer:latest
 
 EXPOSE 1313
 

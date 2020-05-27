@@ -80,14 +80,13 @@ ENV HOME=/home/$USER
 ENV GROUP=$USER
 RUN groupadd $GROUP
 RUN useradd -m -g $GROUP $USER
-
-VOLUME $HOME
 RUN chown -R $USER:$GROUP $HOME
 
 # Add user as a sudoer
 RUN mkdir -p /etc/sudoers.d && \
     echo "$USER ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USER
 
+# Swap to developer user
 USER $USER
 
 # User env config
@@ -102,19 +101,27 @@ COPY --chown=$USER:$GROUP gitconfig $HOME/.gitconfig
 COPY --chown=$USER:$GROUP vimrc $HOME/.vimrc
 COPY --chown=$USER:$GROUP zshrc $HOME/.zshrc
 
-# Vim config
-RUN git clone https://github.com/Vundle=im/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim && \
-    mkdir -p $HOME/.vim/pack/default/st=rt && \
-    git clone https://github.com/sheeru=/vim-polyglot $HOME/.vim/pack/default/start/vim-polyglot && \
-    vim -c 'PluginInstall' -c 'qa!'  &>/dev/null
+# Windows file conversions
+RUN sudo apt-get update && sudo apt-get install -y dos2unix \
+    && dos2unix $HOME/.zshrc \
+    && dos2unix $HOME/.vimrc \
+    && dos2unix $HOME/.gitconfig
 
-# Install ZSH theme
+# Vim config
+RUN git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim && \
+    mkdir -p $HOME/.vim/pack/default/start && \
+    vim +PluginInstall +qall
+
+# Install ZSH theme and configure
 # This has to be run in a single intermediate container, but git needs root. So sudo it
 ENV ZSH_CUSTOM=$HOME/zsh-custom
-RUN sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
-    sudo git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k && \
-    sudo git clone https://github.com/zsh-users/zsh-syntax-highlighting.git && \
-    echo "source ${PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> $HOME/.zshrc && \
+RUN mkdir $ZSH_CUSTOM
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+RUN git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k
+RUN git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/zsh-syntax-highlighting
+RUN \
+    sudo echo "source ${ZSH_CUSTOM}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> $HOME/.zshrc && \
     echo "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" >> $HOME/.zshrc
 
 WORKDIR $HOME/shared
+RUN sudo chown -R $USER:$GROUP .
