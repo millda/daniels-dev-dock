@@ -22,7 +22,8 @@ RUN sudo -H pip3 install --upgrade pip && \
          awscli boto boto3 \
          pylint black yapf \
          cookiecutter \
-         mock
+         mock \
+         wheel uwsgi flask
 
 # Ruby Configuration
 # RUN gem install bundler awspec

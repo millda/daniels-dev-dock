@@ -18,6 +18,7 @@ RUN sudo apt-get install -y nodejs
 RUN sudo npm install -g \
     bundle yo
 RUN yo; exit 0
+RUN sudo chown -R $USER:$GROUP ~/.config
 
 # Python and Pip Configuration
 RUN sudo -H pip3 install --upgrade pip && \
@@ -83,3 +84,8 @@ RUN \
 
 # Verify
 RUN terraform version
+
+
+EXPOSE 5000
+EXPOSE 1313
+EXPOSE 3000
