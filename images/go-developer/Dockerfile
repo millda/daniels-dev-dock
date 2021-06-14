@@ -26,7 +26,7 @@ RUN echo $GOROOT && \
 # RUN sudo chown -R $USER $GOROOT
 
 # Install Terraform
-ARG TERRAFORM_VERSION=0.12.20
+ARG TERRAFORM_VERSION=1.0.0
 RUN \
     sudo mkdir /opt/terraform_install && cd /opt/terraform_install && \
     sudo wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \

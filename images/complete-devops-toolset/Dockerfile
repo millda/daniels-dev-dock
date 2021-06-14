@@ -6,7 +6,6 @@ FROM milldr/base:latest
 # Install apt packages
 RUN sudo apt-get update && \
     sudo apt-get install -y \
-         python-gitlab \
          yamllint \
          npm
 
@@ -18,7 +17,6 @@ RUN sudo apt-get install -y nodejs
 RUN sudo npm install -g \
     bundle yo
 RUN yo; exit 0
-RUN sudo chown -R $USER:$GROUP ~/.config
 
 # Python and Pip Configuration
 RUN sudo -H pip3 install --upgrade pip && \
@@ -26,7 +24,8 @@ RUN sudo -H pip3 install --upgrade pip && \
          awscli boto boto3 \
          pylint black yapf \
          cookiecutter \
-         mock
+         mock \
+         wheel uwsgi flask
 
 # Ruby Configuration
 # RUN gem install bundler awspec
@@ -75,7 +74,7 @@ RUN echo $GOROOT && \
 # RUN sudo chown -R $USER $GOROOT
 
 # Install Terraform
-ARG TERRAFORM_VERSION=0.12.20
+ARG TERRAFORM_VERSION=1.0.0
 RUN \
     sudo mkdir /opt/terraform_install && cd /opt/terraform_install && \
     sudo wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
@@ -84,8 +83,3 @@ RUN \
 
 # Verify
 RUN terraform version
-
-
-EXPOSE 5000
-EXPOSE 1313
-EXPOSE 3000
