@@ -60,7 +60,6 @@ RUN apt-get update \
       vim \
       git \
       nmap \
-      dtrx \
       tree \
       wget \
       net-tools \
